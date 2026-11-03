@@ -10,7 +10,12 @@ import os
 import re
 import subprocess
 import sys
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any
+
+try:
+    from log_quantizer import TerminalLogQuantizer
+except ImportError:
+    from scripts.log_quantizer import TerminalLogQuantizer
 
 
 class IntentAmplifier:
@@ -130,10 +135,11 @@ class IntentAmplifier:
         ]
 
         if error:
+            quantized_error, _ = TerminalLogQuantizer().quantize(error)
             lines.extend([
                 "",
-                "**Root Cause Telemetry / Error Trace:**",
-                f"```text\n{error.strip()}\n```"
+                "**Root Cause Diagnostic (Quantized & Library-Folded):**",
+                f"```text\n{quantized_error.strip()}\n```"
             ])
 
         return "\n".join(lines)

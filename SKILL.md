@@ -73,6 +73,12 @@ Trigger `context-hyperdrive` whenever:
 4. Place dynamic turn instructions in the ephemeral payload suffix.
 5. Captures provider cache hit rates, reducing input token pricing by **90%**.
 
+### Pillar 4: Terminal & Test Log Quantization (`scripts/log_quantizer.py`)
+1. Strips ANSI color escape codes, carriage return spinners, and ASCII progress bars.
+2. Folds external library stack frames (`node_modules/`, `site-packages/`, `<frozen>`, stdlib) into concise 1-line badges while preserving user project frames.
+3. Collapses repetitive compiler warnings and passing test lists (`[+] [OK] N passing tests collapsed`).
+4. Reduces failure traces and terminal outputs by **80% to 95%** without loss of root-cause diagnostics.
+
 ---
 
 ## 3. End-to-End Execution CLI

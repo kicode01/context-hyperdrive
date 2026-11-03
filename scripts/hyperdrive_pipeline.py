@@ -13,10 +13,12 @@ try:
     from shrinkwrap_ast import shrinkwrap_python
     from cache_aligner import PromptCacheAligner
     from intent_amplifier import IntentAmplifier
+    from log_quantizer import TerminalLogQuantizer
 except ImportError:
     from scripts.shrinkwrap_ast import shrinkwrap_python
     from scripts.cache_aligner import PromptCacheAligner
     from scripts.intent_amplifier import IntentAmplifier
+    from scripts.log_quantizer import TerminalLogQuantizer
 
 
 class ContextHyperdrivePipeline:
