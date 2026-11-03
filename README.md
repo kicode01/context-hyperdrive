@@ -21,7 +21,7 @@ Modern AI coding agents face two massive token bottlenecks:
 
 `context-hyperdrive` executes a 5-pillar local optimization in under 3 milliseconds:
 1. **Intent Amplification:** Converts small prompts into structured, mathematically precise execution briefs using local Git diffs and stack traces (`scripts/intent_amplifier.py`).
-2. **AST Shrinkwrap:** Parses code into an Abstract Syntax Tree, keeping target functions in full detail while collapsing irrelevant code into 1-token stubs (75% to 85% token volume reduction via `scripts/shrinkwrap_ast.py`).
+2. **Multi-Language AST Shrinkwrap:** Native syntax tree and grammar parsers for Python, TypeScript/TSX, Go, and Rust, keeping target functions in full detail while collapsing irrelevant code into lightweight stubs (75% to 85% token volume reduction via `scripts/shrinkwrap_ast.py`).
 3. **Deterministic Cache Pinning:** Formats system instructions and tool definitions into immutable blocks (>= 1,024 tokens) to trigger Anthropic, Gemini, and DeepSeek **Prompt Caching** for a **90% cost discount** (`scripts/cache_aligner.py`).
 4. **Terminal Log Quantization:** Collapses 1,000-line test runs and deep library stack traces (`node_modules/`, `site-packages/`) into concise 20-line diagnostic badges (`scripts/log_quantizer.py`).
 5. **Smart Git Diff Compaction:** Filters out lockfiles (`package-lock.json`, `Cargo.lock`, `yarn.lock`) and summarizes hunks by function scope (`scripts/diff_compactor.py`).

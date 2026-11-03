@@ -59,12 +59,12 @@ Trigger `context-hyperdrive` whenever:
    - Non-negotiable boundary constraints (zero regressions, invariant safety).
    - Inferred target source files.
 
-### Pillar 2: AST Context Shrinkwrapping (`scripts/shrinkwrap_ast.py`)
-1. Parse the target source file into a native Abstract Syntax Tree (AST).
-2. Retain the focal target function in full detail.
-3. Replace surrounding non-focal functions and classes with lightweight stubs (`... [N lines pruned: func_name] ...`).
-4. Strip non-essential comments and redundant docstrings outside the focal zone.
-5. Emits code context with a **70% to 85% token volume reduction**.
+### Pillar 2: Multi-Language AST Context Shrinkwrapping (`scripts/shrinkwrap_ast.py`)
+1. Multi-language support with native grammar parsing for **Python (`.py`)**, **TypeScript & TSX (`.ts`, `.tsx`, `.js`, `.jsx`)**, **Go (`.go`)**, and **Rust (`.rs`)**.
+2. Retains focal execution targets, exported types, interfaces, and struct envelopes in full detail.
+3. Automatically identifies parent containers (such as React components wrapping a target handler) and keeps them open while collapsing non-focal sibling functions.
+4. Replaces non-focal method bodies with lightweight valid stubs (`pass` in Python, `{ /* ... pruned ... */ }` in TS/Go/Rust).
+5. Strips non-essential comments and redundant docstrings outside the focal zone, cutting code token bloat by **70% to 85%**.
 
 ### Pillar 3: Deterministic Cache Pinning (`scripts/cache_aligner.py`)
 1. Order all system instructions, project invariant rules, and tool specifications into an immutable prefix block.
