@@ -15,9 +15,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Run Context Hyperdrive Engines
+      - name: Run Context Hyperdrive Test Suite
         run: |
-          python scripts/shrinkwrap_ast.py --demo
-          python scripts/cache_aligner.py
-          python scripts/intent_amplifier.py
-          python scripts/hyperdrive_pipeline.py
+          python test_hyperdrive.py

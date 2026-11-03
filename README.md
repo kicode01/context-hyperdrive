@@ -170,6 +170,16 @@ python scripts/history_compactor.py
 
 ---
 
+## Verification Test Suite
+
+To verify all 7 engines and multi-agent lifecycle hooks with 100% test coverage:
+
+```bash
+python test_hyperdrive.py
+```
+
+---
+
 ## Installation
 
 ### Claude Code — plugin marketplace (recommended)
