@@ -190,4 +190,12 @@ def demo():
 
 
 if __name__ == "__main__":
-    demo()
+    if "--help" in sys.argv or "-h" in sys.argv:
+        print("Usage: python intent_amplifier.py [\"prompt\"] [--demo]")
+        print("Introspects local git state and synthesizes high-IQ execution briefs from terse user prompts.")
+    elif len(sys.argv) > 1 and not sys.argv[1].startswith("--"):
+        prompt_arg = " ".join(sys.argv[1:])
+        amp = IntentAmplifier()
+        print(amp.amplify_prompt(prompt_arg)["execution_brief"])
+    else:
+        demo()

@@ -219,6 +219,43 @@ index 333..444 100644
         self.assertIn("injectSteps", data)
         self.assertIn("CONTEXT-HYPERDRIVE AUTO-HOOK ACTIVE", data["injectSteps"][0]["ephemeralMessage"])
 
+    def test_12_universal_hook_claude_code(self):
+        # 1. Normal short prompt amplification
+        raw_prompt = "fix refund crash"
+        out = handle_claude_hook(raw_prompt, workspace_path=BASE_DIR)
+        self.assertIn("high-iq execution brief", out)
+        self.assertIn("refund", out)
+
+        # 2. JSON format support
+        json_input = json.dumps({"prompt": "fix refund crash"})
+        out_json = handle_claude_hook(json_input, workspace_path=BASE_DIR)
+        parsed = json.loads(out_json)
+        self.assertIn("high-iq execution brief", parsed["prompt"])
+
+    def test_13_pipeline_with_circuit_breaker_and_diff(self):
+        pipeline = ContextHyperdrivePipeline(
+            system_prompt="Guidelines for code agent",
+            tools=[{"name": "test", "description": "run test"}],
+            rules=["Rule A"],
+            workspace_path=BASE_DIR
+        )
+        breaker = TokenCircuitBreaker(max_budget_usd=0.01)
+        ts_code = "export const Comp = () => { const helper = () => { return 1; }; return <div>Hello</div>; };"
+        diff_sample = "diff --git a/src/app.ts b/src/app.ts\n@@ -1,1 +1,1 @@\n-const a = 1;\n+const a = 2;\n"
+        
+        res = pipeline.process(
+            raw_prompt="fix comp layout",
+            source_code=ts_code,
+            active_file="src/comp.tsx",
+            raw_diff=diff_sample,
+            recent_error="SyntaxError: Unexpected token",
+            circuit_breaker=breaker
+        )
+        self.assertIn("circuit_breaker", res)
+        self.assertIn("diff_compaction", res)
+        self.assertIn("error_quantization", res)
+        self.assertEqual(res["shrinkwrap_summary"]["language"], "typescript")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

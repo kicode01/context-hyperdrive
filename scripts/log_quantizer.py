@@ -187,7 +187,15 @@ FAILED test_payments.py::test_process_refund_zero - ValueError: Refund amount mu
 
 
 if __name__ == "__main__":
-    if "--demo" in sys.argv or len(sys.argv) == 1:
+    if "--help" in sys.argv or "-h" in sys.argv:
+        print("Usage: python log_quantizer.py [<logfile>] [--demo]")
+        print("Strips terminal noise and collapses library stack traces.")
+    elif len(sys.argv) > 1 and sys.argv[1] != "--demo" and not sys.argv[1].startswith("-"):
+        with open(sys.argv[1], "r", encoding="utf-8", errors="replace") as f:
+            content = f.read()
+        q, m = TerminalLogQuantizer().quantize(content)
+        print(q)
+    elif "--demo" in sys.argv or (sys.stdin.isatty() and len(sys.argv) == 1):
         demo()
     else:
         text = sys.stdin.read()

@@ -194,4 +194,17 @@ def demo():
 
 
 if __name__ == "__main__":
-    demo()
+    if "--help" in sys.argv or "-h" in sys.argv:
+        print("Usage: python token_circuit_breaker.py [--status] [--reset [amount]] [--demo]")
+        print("Monitors agent spend, total token limits, and trips on ceiling breaches.")
+    elif "--status" in sys.argv:
+        breaker = TokenCircuitBreaker(ledger_path=".hyperdrive_ledger.json")
+        print(json.dumps(breaker.get_status(), indent=2))
+    elif "--reset" in sys.argv:
+        breaker = TokenCircuitBreaker(ledger_path=".hyperdrive_ledger.json")
+        idx = sys.argv.index("--reset")
+        new_b = float(sys.argv[idx + 1]) if len(sys.argv) > idx + 1 else None
+        breaker.reset(new_budget_usd=new_b)
+        print(f"Breaker reset to CLOSED. New Budget: ${breaker.max_budget_usd}")
+    else:
+        demo()

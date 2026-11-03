@@ -18,3 +18,14 @@ jobs:
       - name: Run Context Hyperdrive Test Suite
         run: |
           python test_hyperdrive.py
+      - name: Verify All 7 Engines & Unified Pipeline
+        run: |
+          python scripts/hyperdrive_pipeline.py
+          python scripts/shrinkwrap_ast.py --demo
+          python scripts/cache_aligner.py
+          python scripts/intent_amplifier.py --demo
+          python scripts/log_quantizer.py --demo
+          python scripts/diff_compactor.py --demo
+          python scripts/token_circuit_breaker.py
+          python scripts/history_compactor.py
+          python scripts/hyperdrive_universal_hook.py --demo

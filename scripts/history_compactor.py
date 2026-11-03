@@ -171,4 +171,13 @@ def demo():
 
 
 if __name__ == "__main__":
-    demo()
+    if "--help" in sys.argv or "-h" in sys.argv:
+        print("Usage: python history_compactor.py [<transcript.json>] [--demo]")
+        print("Compacts multi-turn message history into a concise session state snapshot.")
+    elif len(sys.argv) > 1 and sys.argv[1] != "--demo" and not sys.argv[1].startswith("-"):
+        with open(sys.argv[1], "r", encoding="utf-8") as f:
+            msgs = json.load(f)
+        compacted, metrics = HistoryCompactor().compact_history(msgs)
+        print(json.dumps(compacted, indent=2))
+    else:
+        demo()

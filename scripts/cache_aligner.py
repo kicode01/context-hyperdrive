@@ -107,7 +107,7 @@ def demo():
     ]
 
     # Pad system instructions to simulate enterprise skill library (>1024 tokens)
-    padded_system = system + "\n" + ("# Context: Industrial Specification Guidelines\n" * 70)
+    padded_system = system + "\n" + ("# Context: Industrial Specification Guidelines\n" * 80)
 
     aligner = PromptCacheAligner(padded_system, tools, rules)
     result = aligner.assemble_payload(
@@ -126,4 +126,8 @@ def demo():
 
 
 if __name__ == "__main__":
-    demo()
+    if "--help" in sys.argv or "-h" in sys.argv:
+        print("Usage: python cache_aligner.py [--demo]")
+        print("Demonstrates deterministic prompt cache alignment and cost reduction calculation.")
+    else:
+        demo()

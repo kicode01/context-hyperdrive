@@ -220,7 +220,18 @@ index a1b2c3d..e4f5a6b 100644
 
 
 if __name__ == "__main__":
-    if "--demo" in sys.argv or len(sys.argv) == 1:
+    if "--help" in sys.argv or "-h" in sys.argv:
+        print("Usage: python diff_compactor.py [--live] [<difffile>] [--demo]")
+        print("Compacts git diff output and auto-excludes lockfiles.")
+    elif "--live" in sys.argv:
+        c, m = GitDiffCompactor().get_live_compacted_diff()
+        print(c)
+    elif len(sys.argv) > 1 and sys.argv[1] != "--demo" and not sys.argv[1].startswith("-"):
+        with open(sys.argv[1], "r", encoding="utf-8", errors="replace") as f:
+            content = f.read()
+        c, m = GitDiffCompactor().compact_diff(content)
+        print(c)
+    elif "--demo" in sys.argv or (sys.stdin.isatty() and len(sys.argv) == 1):
         demo()
     else:
         text = sys.stdin.read()
