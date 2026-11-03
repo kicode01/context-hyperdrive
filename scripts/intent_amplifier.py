@@ -14,8 +14,10 @@ from typing import Dict, List, Optional, Tuple, Any
 
 try:
     from log_quantizer import TerminalLogQuantizer
+    from diff_compactor import GitDiffCompactor
 except ImportError:
     from scripts.log_quantizer import TerminalLogQuantizer
+    from scripts.diff_compactor import GitDiffCompactor
 
 
 class IntentAmplifier:
@@ -79,6 +81,17 @@ class IntentAmplifier:
         # Determine cognitive intent category
         intent_category = self._classify_intent(clean_prompt, recent_error)
 
+        # Retrieve live compacted git diff if workspace has active changes
+        compacted_diff = ""
+        if git_ctx["modified"]:
+            try:
+                compactor = GitDiffCompactor(self.workspace_path)
+                diff_text, _ = compactor.get_live_compacted_diff()
+                if diff_text and diff_text != "No changes detected.":
+                    compacted_diff = diff_text
+            except Exception:
+                compacted_diff = ""
+
         # Build high-IQ execution specification
         amplified_spec = {
             "original_prompt": clean_prompt,
@@ -88,8 +101,9 @@ class IntentAmplifier:
             "inferred_target_file": target_file or "Auto-detect from AST",
             "active_modifications": git_ctx["modified"][:5],
             "error_context_injected": bool(recent_error),
+            "diff_context_injected": bool(compacted_diff),
             "execution_brief": self._build_brief(
-                clean_prompt, intent_category, extracted_symbols, target_file, recent_error
+                clean_prompt, intent_category, extracted_symbols, target_file, recent_error, compacted_diff
             )
         }
         return amplified_spec
@@ -119,7 +133,8 @@ class IntentAmplifier:
         category: str,
         symbols: List[str],
         target_file: Optional[str],
-        error: Optional[str]
+        error: Optional[str],
+        compacted_diff: str = ""
     ) -> str:
         lines = [
             f"### HIGH-PRECISION EXECUTION BRIEF (Synthesized from: \"{raw_prompt}\")",
@@ -140,6 +155,13 @@ class IntentAmplifier:
                 "",
                 "**Root Cause Diagnostic (Quantized & Library-Folded):**",
                 f"```text\n{quantized_error.strip()}\n```"
+            ])
+
+        if compacted_diff:
+            lines.extend([
+                "",
+                "**Active Local Changes (Compacted Git Diff):**",
+                f"```diff\n{compacted_diff[:1200].strip()}\n```"
             ])
 
         return "\n".join(lines)

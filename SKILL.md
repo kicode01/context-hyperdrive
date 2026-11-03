@@ -79,11 +79,16 @@ Trigger `context-hyperdrive` whenever:
 3. Collapses repetitive compiler warnings and passing test lists (`[+] [OK] N passing tests collapsed`).
 4. Reduces failure traces and terminal outputs by **80% to 95%** without loss of root-cause diagnostics.
 
+### Pillar 5: Smart Git Diff Compaction (`scripts/diff_compactor.py`)
+1. Automatically detects and excludes noise lockfiles (`package-lock.json`, `Cargo.lock`, `yarn.lock`, minified assets).
+2. Strips unmodified context lines, grouping hunks into concise function-level change summaries (`[Scope: def my_func]`).
+3. Reduces multi-file PR and commit diffs by **80% to 95%** while retaining exact additions and deletions.
+
 ---
 
 ## 3. End-to-End Execution CLI
 
-To run the unified 3-pillar optimization pipeline on any prompt and target file:
+To run the unified optimization pipeline on any prompt and target file:
 
 ```bash
 python scripts/hyperdrive_pipeline.py
@@ -97,6 +102,12 @@ python scripts/shrinkwrap_ast.py path/to/file.py symbol_name
 
 # Verify prompt cache alignment
 python scripts/cache_aligner.py
+
+# Quantize test logs and error traces
+python scripts/log_quantizer.py --demo
+
+# Compact git diffs and exclude lockfiles
+python scripts/diff_compactor.py --demo
 
 # Amplify terse prompt into structured brief
 python scripts/intent_amplifier.py

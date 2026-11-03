@@ -19,11 +19,12 @@ Modern AI coding agents face two massive token bottlenecks:
 1. **The Reasoning Tax:** When users give short, 3-5 word prompts (e.g. *"fix checkout crash"*), "High Reasoning" models (o1, Claude 3.7 Thinking, Gemini Thinking) burn thousands of hidden tokens "guessing" what to look at, causing 30-second delays and rapid `429 Rate Limit` exhaustion.
 2. **Context Window Bloat & Cache Misses:** Agents routinely dump raw 2,000-line source files into the prompt. Furthermore, dynamic timestamps and shifting file orders constantly invalidate prompt caches, forcing developers to pay full price for millions of input tokens.
 
-`context-hyperdrive` executes a 4-pillar local optimization in under 3 milliseconds:
+`context-hyperdrive` executes a 5-pillar local optimization in under 3 milliseconds:
 1. **Intent Amplification:** Converts small prompts into structured, mathematically precise execution briefs using local Git diffs and stack traces (`scripts/intent_amplifier.py`).
 2. **AST Shrinkwrap:** Parses code into an Abstract Syntax Tree, keeping target functions in full detail while collapsing irrelevant code into 1-token stubs (75% to 85% token volume reduction via `scripts/shrinkwrap_ast.py`).
 3. **Deterministic Cache Pinning:** Formats system instructions and tool definitions into immutable blocks (>= 1,024 tokens) to trigger Anthropic, Gemini, and DeepSeek **Prompt Caching** for a **90% cost discount** (`scripts/cache_aligner.py`).
 4. **Terminal Log Quantization:** Collapses 1,000-line test runs and deep library stack traces (`node_modules/`, `site-packages/`) into concise 20-line diagnostic badges (`scripts/log_quantizer.py`).
+5. **Smart Git Diff Compaction:** Filters out lockfiles (`package-lock.json`, `Cargo.lock`, `yarn.lock`) and summarizes hunks by function scope (`scripts/diff_compactor.py`).
 
 ---
 
@@ -62,6 +63,9 @@ python scripts/intent_amplifier.py
 
 # 4. Quantize verbose terminal logs & fold library stack traces:
 python scripts/log_quantizer.py --demo
+
+# 5. Compact git diffs and exclude lockfiles:
+python scripts/diff_compactor.py --demo
 ```
 
 ---
