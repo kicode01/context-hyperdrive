@@ -24,6 +24,7 @@ if SCRIPT_DIR not in sys.path:
 
 from intent_amplifier import IntentAmplifier
 from shrinkwrap_ast import shrinkwrap_python
+from token_circuit_breaker import TokenCircuitBreaker
 
 
 def handle_antigravity_preinvocation(stdin_data: str) -> str:
@@ -41,14 +42,41 @@ def handle_antigravity_preinvocation(stdin_data: str) -> str:
     if not user_input:
         return json.dumps({})
 
+    workspace_paths = data.get("workspacePaths", ["."])
+    workspace = workspace_paths[0] if workspace_paths else "."
+
+    # Check Circuit Breaker status
+    ledger_file = os.path.join(workspace, ".hyperdrive_ledger.json")
+    breaker = TokenCircuitBreaker(ledger_path=ledger_file)
+
+    if "reset budget" in user_input.lower():
+        breaker.reset()
+        return json.dumps({
+            "injectSteps": [
+                {
+                    "ephemeralMessage": "[CONTEXT-HYPERDRIVE] Token Budget Circuit Breaker successfully reset to CLOSED state."
+                }
+            ]
+        })
+
+    if breaker.state == "TRIPPED":
+        return json.dumps({
+            "injectSteps": [
+                {
+                    "ephemeralMessage": (
+                        f"[CONTEXT-HYPERDRIVE ALERT: CIRCUIT BREAKER TRIPPED]\n"
+                        f"{breaker.trip_reason}\n"
+                        f"Autonomous execution paused to prevent runaway API spend. "
+                        f"To resume, type 'reset budget' or update the ceiling in .hyperdrive_ledger.json."
+                    )
+                }
+            ]
+        })
+
     # Check if prompt is short (<= 7 words) or needs amplification
     words = user_input.split()
     if len(words) > 8:
-        # Long detailed prompts do not require synthetic intent expansion
         return json.dumps({})
-
-    workspace_paths = data.get("workspacePaths", ["."])
-    workspace = workspace_paths[0] if workspace_paths else "."
 
     amplifier = IntentAmplifier(workspace_path=workspace)
     spec = amplifier.amplify_prompt(user_input)

@@ -84,6 +84,11 @@ Trigger `context-hyperdrive` whenever:
 2. Strips unmodified context lines, grouping hunks into concise function-level change summaries (`[Scope: def my_func]`).
 3. Reduces multi-file PR and commit diffs by **80% to 95%** while retaining exact additions and deletions.
 
+### Pillar 6: Hard Token Budget Circuit Breaker (`scripts/token_circuit_breaker.py`)
+1. Enforces hard financial and token ceilings ($USD max spend, total token limits, max iterations).
+2. FSM states: `CLOSED` (normal tracking) -> `TRIPPED` (halt loop, require confirmation) -> `RESET`.
+3. Intercepts runaway loops in `PreInvocation` and `PreToolUse`, preventing billing surprises and quota lockouts.
+
 ---
 
 ## 3. End-to-End Execution CLI
@@ -108,6 +113,9 @@ python scripts/log_quantizer.py --demo
 
 # Compact git diffs and exclude lockfiles
 python scripts/diff_compactor.py --demo
+
+# Monitor and test circuit breaker state
+python scripts/token_circuit_breaker.py
 
 # Amplify terse prompt into structured brief
 python scripts/intent_amplifier.py
