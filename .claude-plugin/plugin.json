@@ -1,0 +1,12 @@
+{
+  "name": "context-hyperdrive",
+  "version": "1.0.0",
+  "description": "Cognitive intent amplifier, AST context shrinkwrapper, and deterministic prompt cache stabilizer for AI coding agents.",
+  "author": {
+    "name": "Kian",
+    "url": "https://github.com/kicode01"
+  },
+  "skills": [
+    "./"
+  ]
+}

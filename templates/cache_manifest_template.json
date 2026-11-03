@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ContextHyperdriveCacheManifest",
+  "description": "Deterministic prompt cache alignment manifest for AI agents",
+  "version": "1.0.0",
+  "cache_policy": {
+    "provider": "anthropic",
+    "min_cache_tokens": 1024,
+    "strategy": "prefix_pinning",
+    "ttl": "ephemeral"
+  },
+  "immutable_blocks": [
+    {
+      "id": "system_instructions",
+      "path": "prompts/system.md",
+      "dynamic_tokens_allowed": false
+    },
+    {
+      "id": "tool_definitions",
+      "path": "prompts/tools_schema.json",
+      "dynamic_tokens_allowed": false
+    },
+    {
+      "id": "project_invariants",
+      "path": "AGENTS.md",
+      "dynamic_tokens_allowed": false
+    }
+  ],
+  "ephemeral_blocks": [
+    {
+      "id": "ast_shrinkwrapped_context",
+      "max_tokens": 2048,
+      "prune_strategy": "focal_ast_stubs"
+    },
+    {
+      "id": "amplified_intent_brief",
+      "max_tokens": 512,
+      "prune_strategy": "symbol_extraction"
+    }
+  ]
+}
