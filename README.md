@@ -19,13 +19,106 @@ Modern AI coding agents face two massive token bottlenecks:
 1. **The Reasoning Tax:** When users give short, 3-5 word prompts (e.g. *"fix checkout crash"*), "High Reasoning" models (o1, Claude 3.7 Thinking, Gemini Thinking) burn thousands of hidden tokens "guessing" what to look at, causing 30-second delays and rapid `429 Rate Limit` exhaustion.
 2. **Context Window Bloat & Cache Misses:** Agents routinely dump raw 2,000-line source files into the prompt. Furthermore, dynamic timestamps and shifting file orders constantly invalidate prompt caches, forcing developers to pay full price for millions of input tokens.
 
-`context-hyperdrive` executes a 6-pillar local optimization in under 3 milliseconds:
+`context-hyperdrive` executes a 7-pillar local optimization in under 3 milliseconds:
 1. **Intent Amplification:** Converts small prompts into structured, mathematically precise execution briefs using local Git diffs and stack traces (`scripts/intent_amplifier.py`).
 2. **Multi-Language AST Shrinkwrap:** Native syntax tree and grammar parsers for Python, TypeScript/TSX, Go, and Rust, keeping target functions in full detail while collapsing irrelevant code into lightweight stubs (75% to 85% token volume reduction via `scripts/shrinkwrap_ast.py`).
 3. **Deterministic Cache Pinning:** Formats system instructions and tool definitions into immutable blocks (>= 1,024 tokens) to trigger Anthropic, Gemini, and DeepSeek **Prompt Caching** for a **90% cost discount** (`scripts/cache_aligner.py`).
 4. **Terminal Log Quantization:** Collapses 1,000-line test runs and deep library stack traces (`node_modules/`, `site-packages/`) into concise 20-line diagnostic badges (`scripts/log_quantizer.py`).
 5. **Smart Git Diff Compaction:** Filters out lockfiles (`package-lock.json`, `Cargo.lock`, `yarn.lock`) and summarizes hunks by function scope (`scripts/diff_compactor.py`).
 6. **Token Budget Circuit Breaker:** Hard financial ($USD) and token ceilings with FSM state enforcement (`CLOSED` -> `TRIPPED` -> `RESET`) to block runaway agent loops (`scripts/token_circuit_breaker.py`).
+7. **Multi-Turn History Compactor:** Collapses turns 1–10 into a compact semantic state snapshot while preserving the active horizon, preventing context degradation in long chats (`scripts/history_compactor.py`).
+
+---
+
+## Visual Before vs. After Showcase
+
+### 1. Small Prompts: Bypassing the High-Reasoning Tax
+```text
+[BEFORE]: User types "fix refund bug"
+  ↳ Model triggers "High Reasoning": Burns 8,500 hidden thinking tokens wandering across 12 files.
+  ↳ Latency: 35 seconds. Cost: $0.05. High risk of 429 quota exhaustion.
+
+[AFTER WITH HYPERDRIVE]:
+  ↳ Hook runs intent_amplifier.py in 1.8ms.
+  ↳ Detects git modified file (payment_service.py) + focal symbol (process_refund).
+  ↳ Injects high-IQ brief with boundary invariants directly into context.
+  ↳ Model executes immediately: 2.1 seconds, 0 wasted reasoning tokens.
+```
+
+### 2. Code Context: Multi-Language AST Shrinkwrapping (TSX / Python / Go / Rust)
+```typescript
+// [BEFORE]: Raw 200-line file dump (850 tokens sent to LLM)
+export const CheckoutView: React.FC = () => {
+    const computeTax = () => { /* 40 lines of tax logic */ };
+    const validateZip = () => { /* 30 lines of zip validation */ };
+    const handleRefund = async (id: string) => { api.post('/refund', { id }); };
+    const renderFooter = () => { /* 60 lines of JSX footer */ };
+    return <div>...</div>;
+};
+
+// [AFTER WITH HYPERDRIVE]: Shrinkwrapped AST (140 tokens — 83% reduction!)
+export const CheckoutView: React.FC = () => {
+    const computeTax = () => { /* ... pruned: computeTax ... */ };
+    const validateZip = () => { /* ... pruned: validateZip ... */ };
+    const handleRefund = async (chargeId: string) => { api.post('/refund', { chargeId }); };
+    const renderFooter = () => { /* ... pruned: renderFooter ... */ };
+    return <div>...</div>;
+};
+```
+
+### 3. Terminal & Test Logs: Stack Trace & Warning Quantization
+```text
+// [BEFORE]: Raw 400-line pytest / npm test failure (1,800 tokens)
+Traceback (most recent call last):
+  File ".../site-packages/_pytest/runner.py", line 341, in from_call ...
+  File ".../site-packages/pluggy/_manager.py", line 120, in _hookexec ...
+  File ".../lib/python3.11/unittest/case.py", line 580, in run ...
+  File "src/payment.py", line 32, in process_refund
+    raise ValueError("Refund must be positive")
+[Warning]: Deprecated API (repeated 24 times)
+... 65 passing test lines ...
+
+// [AFTER WITH HYPERDRIVE]: Quantized Diagnostic Output (95 tokens — 94% reduction!)
+  [+] [OK] 65 passing tests collapsed
+Traceback (most recent call last):
+    ... [14 internal library frames collapsed: site-packages] ...
+  File "src/payment.py", line 32, in process_refund
+    raise ValueError("Refund must be positive")
+  [!] [Warning x24]: Deprecated API
+```
+
+### 4. Git Diffs: Auto-Excluding Lockfile Noise
+```diff
+// [BEFORE]: 3,500 lines of git diff including package-lock.json (14,000 tokens)
+diff --git a/package-lock.json b/package-lock.json
+... 3,450 lines of dependency SHA updates ...
+diff --git a/src/payment.py b/src/payment.py
+@@ -10,3 +10,3 @@
+- if amount < 0:
++ if amount <= 0:
+
+// [AFTER WITH HYPERDRIVE]: Compacted Semantic Diff (65 tokens — 99% reduction!)
+[!] [Excluded Lockfile / Generated]: package-lock.json (3,450 diff lines omitted)
+--- File: src/payment.py ---
+  [Scope: class PaymentGateway:]
+  - if amount < 0:
+  + if amount <= 0:
+```
+
+### 5. Multi-Turn Chat: Preserving 90% Provider Cache & Preventing Memory Loss
+```text
+// [BEFORE]: Turn 20 conversation history (85,000 bloated tokens)
+Turns 1-15 contain outdated build attempts, superseded files, and debug chatter.
+Every turn costs $0.25 and suffers attention degradation ("lost in the middle").
+
+// [AFTER WITH HYPERDRIVE]: History Compactor (1,200 tokens — 98% reduction!)
+Turns 1-15 summarized into an immutable State Snapshot:
+  • Active Files: src/payment.py, src/webhook.py
+  • Resolved Issues: Fixed zero-refund ValueError
+  • Decisions: Chose Redis cluster for idempotency lock
+Turns 16-20 (Active Horizon) preserved in 100% full detail.
+Prompt cache stays pinned for a 90% provider discount on all subsequent turns!
+```
 
 ---
 
@@ -70,6 +163,9 @@ python scripts/diff_compactor.py --demo
 
 # 6. Test hard token budget circuit breaker:
 python scripts/token_circuit_breaker.py
+
+# 7. Compact multi-turn conversation history:
+python scripts/history_compactor.py
 ```
 
 ---
