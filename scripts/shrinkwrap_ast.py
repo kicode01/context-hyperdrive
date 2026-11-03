@@ -30,11 +30,8 @@ class ASTShrinkwrapper(ast.NodeTransformer):
             omitted = max(1, end_lineno - start_lineno)
             self.pruned_lines_count += omitted
 
-            # Replace body with a docstring or pass stub
-            stub_expr = ast.Expr(
-                value=ast.Constant(value=f"... [{omitted} lines pruned: {node.name}] ...")
-            )
-            node.body = [stub_expr]
+            # Replace body with minimal valid pass stub
+            node.body = [ast.Pass()]
             return node
         
         return self.generic_visit(node)
@@ -46,10 +43,7 @@ class ASTShrinkwrapper(ast.NodeTransformer):
             end_lineno = getattr(node, 'end_lineno', start_lineno + len(node.body))
             omitted = max(1, end_lineno - start_lineno)
             self.pruned_lines_count += omitted
-            stub_expr = ast.Expr(
-                value=ast.Constant(value=f"... [{omitted} lines pruned: {node.name}] ...")
-            )
-            node.body = [stub_expr]
+            node.body = [ast.Pass()]
             return node
         return self.generic_visit(node)
 
